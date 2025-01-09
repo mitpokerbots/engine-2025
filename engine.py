@@ -488,7 +488,7 @@ class Game():
         Incorporates TerminalState information into the game log and player messages.
         '''
         previous_state = round_state.previous_state
-        if FoldAction not in previous_state.legal_actions():
+        if not self.log[-1].endswith(' folds'):
             self.log.append('{} shows {}'.format(players[0].name, PCARDS(previous_state.hands[0])))
             self.log.append('{} shows {}'.format(players[1].name, PCARDS(previous_state.hands[1])))
             self.player_messages[0].append('O' + CCARDS(previous_state.hands[1]))
