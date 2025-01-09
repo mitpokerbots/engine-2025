@@ -98,9 +98,9 @@ public class RoundState extends State {
             // we can only raise the stakes if both players can afford it
             boolean betsForbidden = ((this.stacks.get(0) == 0) | (this.stacks.get(1) == 0));
             if (betsForbidden) {
-                return new HashSet<ActionType>(Arrays.asList(ActionType.CHECK_ACTION_TYPE));
+                return new HashSet<ActionType>(Arrays.asList(ActionType.CHECK_ACTION_TYPE, ActionType.FOLD_ACTION_TYPE));
             }
-            return new HashSet<ActionType>(Arrays.asList(ActionType.CHECK_ACTION_TYPE, ActionType.RAISE_ACTION_TYPE));
+            return new HashSet<ActionType>(Arrays.asList(ActionType.CHECK_ACTION_TYPE, ActionType.RAISE_ACTION_TYPE, ActionType.FOLD_ACTION_TYPE));
         }
         // continueCost > 0
         // similarly, re-raising is only allowed if both players can afford it

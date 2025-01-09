@@ -45,10 +45,13 @@ public:
 
   void run() {
     GameInfoPtr gameInfo = std::make_shared<GameInfo>(0, 0.0, 1);
+    std::array<std::array<std::string, 2>, 2> emptyArray;
+    auto emptyBounties = std::array<char, 2>{};
+    std::array<std::string, 5> cardDeck;
     StatePtr roundState = std::make_shared<RoundState>(
         0, 0, std::array<int, 2>{0, 0}, std::array<int, 2>{0, 0},
-        std::array<std::array<std::string, 2>, 2>{}, std::array<char, 2>{},
-        std::array<std::string, 5>{}, nullptr);
+        emptyArray, emptyBounties,
+        cardDeck, nullptr);
     int active = 0;
     bool roundFlag = true;
     while (true) {

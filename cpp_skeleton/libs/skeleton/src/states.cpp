@@ -17,9 +17,9 @@ std::unordered_set<Action::Type> RoundState::legalActions() const {
   if (continueCost == 0) {
     // we can only raise the stakes if both players can afford it
     auto betsForbidden = stacks[0] == 0 || stacks[1] == 0;
-    return betsForbidden ? std::unordered_set<Action::Type>{Action::Type::CHECK}
+    return betsForbidden ? std::unordered_set<Action::Type>{Action::Type::CHECK, Action::Type::FOLD}
                          : std::unordered_set<Action::Type>{
-                               Action::Type::CHECK, Action::Type::RAISE};
+                               Action::Type::CHECK, Action::Type::RAISE, Action::Type::FOLD};
   }
   // continueCost > 0
   // similarly, re-raising is only allowed if both players can afford it

@@ -51,7 +51,7 @@ class RoundState(namedtuple('_RoundState', ['button', 'street', 'pips', 'stacks'
         if continue_cost == 0:
             # we can only raise the stakes if both players can afford it
             bets_forbidden = (self.stacks[0] == 0 or self.stacks[1] == 0)
-            return {CheckAction} if bets_forbidden else {CheckAction, RaiseAction}
+            return {CheckAction, FoldAction} if bets_forbidden else {CheckAction, RaiseAction, FoldAction}
         # continue_cost > 0
         # similarly, re-raising is only allowed if both players can afford it
         raises_forbidden = (continue_cost == self.stacks[active] or self.stacks[1-active] == 0)
