@@ -146,7 +146,7 @@ class Player(Bot):
                     
                 if rank1 == "A" or rank2 == "A": #Has a A (2-K suited, 6-K unsuited)
                     if suit1 == suit2:  
-                        return CallAction()
+                        return CallAction() 
                     else:
                         for i in range(4, len(card_type)-1):
                             if rank1 == card_type[i]:
@@ -231,6 +231,9 @@ class Player(Bot):
                 return FoldAction()
                         
 
+        if street == 3:
+            if RaiseAction in legal_actions:
+                
                         
                         
                     
