@@ -160,8 +160,8 @@ class Player(Bot):
                             return CallAction()
 
                 if rank1 == "A" or rank2 == "A": #Has a A (2-K suited, 6-K unsuited)
-                    if suit1 == suit2:  
-                        return CallAction() 
+                    if suit1 == suit2:
+                        return CallAction()
                     else:
                         for i in range(4, len(card_type)-1):
                             if rank1 == card_type[i]:
@@ -245,6 +245,12 @@ class Player(Bot):
             if FoldAction in legal_actions:
                 return FoldAction()
 
+
+
+
+
+
+
         if RaiseAction in legal_actions:
            min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
            min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
@@ -257,6 +263,27 @@ class Player(Bot):
         if random.random() < 0.25:
             return FoldAction()
         return CallAction()
+
+    def check_suits_equal(self, card1, card2):
+        if card1[1] == card2[1]:
+            return True
+        return False
+
+    def check_ranks_equal(self, card1, card2):
+        if card1[0] == card2[0]:
+            return True
+        return False
+
+    def check_pair(self, cards):
+        for card1_index in range(cards.len()-1):
+            for card2_index in range (card1_index + 1, cards.len()):
+                if check_suits_equal(cards[card1_index], cards[card2_index]) and check_ranks_equal(cards[card1_index], my_cards[card2_index]):
+                    return True
+        return False
+
+
+
+
 
 
 if __name__ == '__main__':
