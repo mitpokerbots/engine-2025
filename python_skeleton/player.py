@@ -189,6 +189,46 @@ class Player(Bot):
         
         return False
     
+    def check_FourStraight(self, game_state, round_state, active):
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+        all_cards = my_cards + board_cards
+        
+        if street == 0:
+            return False
+        
+        ranks = '23456789TJQKA'
+        rank_values = {rank: index for index, rank in enumerate(ranks)}
+        card_ranks = sorted([rank_values[card[0]] for card in all_cards])
+
+        straight = False
+        for i in range(len(card_ranks)-3):
+            if card_ranks[i] == card_ranks[i+1]-1 and card_ranks[i+1] == card_ranks[i+2]-1 and card_ranks[i+2] == card_ranks[i+3]-1:
+                return True
+        
+        return False
+    
+    def check_ThreeStraight(self, game_state, round_state, active):
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+        all_cards = my_cards + board_cards
+        
+        if street == 0:
+            return False
+        
+        ranks = '23456789TJQKA'
+        rank_values = {rank: index for index, rank in enumerate(ranks)}
+        card_ranks = sorted([rank_values[card[0]] for card in all_cards])
+
+        straight = False
+        for i in range(len(card_ranks)-2):
+            if card_ranks[i] == card_ranks[i+1]-1 and card_ranks[i+1] == card_ranks[i+2]-1:
+                return True
+        
+        return False
+    
     def check_flush(self,game_state,round_state, active):
         street = round_state.street
         my_cards = round_state.hands[active]
@@ -286,10 +326,22 @@ class Player(Bot):
         board_cards = round_state.deck[:street]
         cards = my_cards + board_cards
 
-        for card1_index in range(cards.len()-1):
-            for card2_index in range (card1_index + 1, cards.len()):
+        for card1_index in range(len(cards)-1):
+            for card2_index in range (card1_index + 1, len(cards)):
                 if self.check_ranks_equal(cards[card1_index], cards[card2_index]):
-                    return True
+                    return cards[card1_index][0]
+        return None
+    
+    def check_ThreeSameSuites(self, game_state, round_state, active):
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+        cards = my_cards + board_cards
+
+        for i in range(0, len(cards)-2):
+            if cards[i][1] == cards[i+1][1] and cards[i+1][1] == cards[i+2][1]:
+                return True
+        
         return False
     
     def get_action(self, game_state, round_state, active):
@@ -446,27 +498,121 @@ class Player(Bot):
                 return FoldAction()
 
 
+        if street == 3:
+            if RaiseAction in legal_actions:
+                min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
+                min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
+                max_cost = max_raise - my_pip  # the cost of a maximum bet/raise
+
+                if self.check_Quads(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 200), max_cost))
+                
+                if self.check_FullHouse(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 175), max_cost))
+                
+                if self.check_flush(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 150), max_cost))
+                
+                if self.check_Straight(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 100), max_cost))
+                
+                if self.check_fourSameSuit(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 75), max_cost))
+                    
+                if self.check_FourStraight(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 50), max_cost))
+                    
+                if self.check_triples(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 50), max_cost))
+
+                if self.check_2_pairs(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 30), max_cost))
+
+                if self.check_pair(game_state, round_state, active) != None and self.check_pair(game_state, round_state, active) in "KA":
+                    return RaiseAction(min(max(min_cost, 30), max_cost))
+            
+            if CallAction in legal_actions:
+                if self.check_pair(game_state, round_state, active) != None and self.check_pair(game_state, round_state, active) in "JQ":
+                    return CallAction()
+
+                if self.check_ThreeSameSuites(game_state, round_state, active):
+                    if opp_pip <= 75:
+                            return CallAction()
+                
+                if self.check_pair(game_state, round_state, active) != None and self.check_pair(game_state, round_state, active) in "789T":
+                    if opp_pip <= 75:
+                            return CallAction()
+                
+                if self.check_ThreeStraight(game_state, round_state, active):
+                    if opp_pip <= 75:
+                            return CallAction()
+            
+            if CheckAction in legal_actions:
+                return CheckAction()
+            
+            if FoldAction in legal_actions:
+                return FoldAction()
+
+        if street == 4:
+            if RaiseAction in legal_actions:
+                min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
+                min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
+                max_cost = max_raise - my_pip  # the cost of a maximum bet/raise
+                if self.check_Quads(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 150), max_cost))
+                if self.check_FullHouse(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 100), max_cost))
+                if self.check_flush(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 80), max_cost))
+                if self.check_Straight(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 70), max_cost))
+                if self.check_fourSameSuit(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 30), max_cost))
+                if self.check_triples(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 30), max_cost))
+                if self.check_2_pairs(game_state, round_state, active):
+                    return RaiseAction(min_raise)
+            
+            if CallAction in legal_actions:
+                if self.check_FourStraight(game_state, round_state, active) or (self.check_pair(game_state, round_state, active) != None and self.check_pair(game_state, round_state, active) in "KA"):
+                    return CallAction()
+                elif self.check_pair(game_state, round_state, active) != None and self.check_pair(game_state, round_state, active) in "TJQ":
+                    return CallAction()
+                
+            if CheckAction in legal_actions:
+                return CheckAction()
+            
+            if FoldAction in legal_actions:
+                return FoldAction()
+        
+        if street == 5:
+            if RaiseAction in legal_actions:
+                min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
+                min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
+                max_cost = max_raise - my_pip  # the cost of a maximum bet/raise
 
 
+                if self.check_Quads(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 150), max_cost))
+                elif self.check_FullHouse(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 100), max_cost))
+                elif self.check_flush(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 80), max_cost))
+                elif self.check_Straight(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 50), max_cost))
+                elif self.check_triples(game_state, round_state, active):
+                    return RaiseAction(min(max(min_cost, 40), max_cost))
 
 
+            if CallAction in legal_actions:
+                if self.check_pair(game_state, round_state, active) == 'K' or self.check_pair(game_state, round_state, active) == 'A':
+                    return CallAction()
 
-        if RaiseAction in legal_actions:
-           min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
-           min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
-           max_cost = max_raise - my_pip  # the cost of a maximum bet/raise
-        if RaiseAction in legal_actions:
-            if random.random() < 0.5:
-                return RaiseAction(min_raise)
-        if CheckAction in legal_actions:  # check-call
-            return CheckAction()
-        if random.random() < 0.25:
-            return FoldAction()
-        return CallAction()
-
-
-
-
+            if CheckAction in legal_actions:
+                return CheckAction()
+            
+            if FoldAction in legal_actions:
+                return FoldAction()
 
 if __name__ == '__main__':
     run_bot(Player(), parse_args())
