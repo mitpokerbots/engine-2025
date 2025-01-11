@@ -160,8 +160,8 @@ class Player(Bot):
                             return CallAction()
 
                 if rank1 == "A" or rank2 == "A": #Has a A (2-K suited, 6-K unsuited)
-                    if suit1 == suit2:
-                        return CallAction()
+                    if suit1 == suit2:  
+                        return CallAction() 
                     else:
                         for i in range(4, len(card_type)-1):
                             if rank1 == card_type[i]:
@@ -244,12 +244,6 @@ class Player(Bot):
 
             if FoldAction in legal_actions:
                 return FoldAction()
-
-
-
-
-
-
 
         if RaiseAction in legal_actions:
            min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
