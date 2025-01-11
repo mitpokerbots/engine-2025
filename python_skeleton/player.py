@@ -9,21 +9,6 @@ from skeleton.runner import parse_args, run_bot
 
 import random
 
-def check_2_pairs(my_cards, street):
-    num_pair = 0
-    pairs = []
-    for i in range(0, street+1):
-        for j in range(i+1, street+2):
-            if check_ranks_equal(my_cards[i], my_cards[j]):
-                num_pair += 1
-                pairs.append([my_cards[i], my_cards[j]])
-    if num_pair == 2:
-        return pairs
-    else:
-        return None
-
-def check_triples(my_cards, street):
-    pass
 
 class Player(Bot):
     '''
@@ -274,12 +259,30 @@ class Player(Bot):
             return True
         return False
 
-    def check_pair(self, cards):
+    def check_pair(self, cards): ##returns the rank of pair if there exists a pair, 0 otherwise
         for card1_index in range(cards.len()-1):
             for card2_index in range (card1_index + 1, cards.len()):
                 if check_suits_equal(cards[card1_index], cards[card2_index]) and check_ranks_equal(cards[card1_index], my_cards[card2_index]):
-                    return True
-        return False
+                    return cards[card1_index][0]
+        return '0'
+
+    def check_2_pairs(my_cards, street):
+        num_pair = 0
+        pairs = []
+        for i in range(0, street+1):
+            for j in range(i+1, street+2):
+                if check_ranks_equal(my_cards[i], my_cards[j]):
+                    num_pair += 1
+                    pairs.append([my_cards[i], my_cards[j]])
+        if num_pair == 2:
+            return pairs
+        else:
+            return None
+
+    def check_triples(my_cards, street):
+        pass
+
+
 
 
 
