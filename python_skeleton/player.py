@@ -232,10 +232,6 @@ class Player(Bot):
 
 
 
-
-
-
-
         if RaiseAction in legal_actions:
            min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
            min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
@@ -249,24 +245,24 @@ class Player(Bot):
             return FoldAction()
         return CallAction()
 
-    def check_suits_equal(card1, card2):
+    def check_suits_equal(self, card1, card2):
         if card1[1] == card2[1]:
             return True
         return False
 
-    def check_ranks_equal(card1, card2):
+    def check_ranks_equal(self, card1, card2):
         if card1[0] == card2[0]:
             return True
         return False
 
-    def check_pair(my_cards):
-        for card1_index in range(my_cards.len()-1):
-            for card2_index in range (card1_index + 1, my_cards.len()):
-                if check_suits_equal(my_cards[card1_index], my_cards[card2_index]) and check_ranks_equal(my_cards[card1_index], my_cards[card2_index]):
+    def check_pair(self, cards):
+        for card1_index in range(cards.len()-1):
+            for card2_index in range (card1_index + 1, cards.len()):
+                if check_suits_equal(cards[card1_index], cards[card2_index]) and check_ranks_equal(cards[card1_index], my_cards[card2_index]):
                     return True
         return False
 
-    
+
 
 
 
