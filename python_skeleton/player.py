@@ -270,6 +270,28 @@ class Player(Bot):
         # Check if there are exactly two pairs
         return num_pairs == 2
     
+    def check_suits_equal(self, card1, card2):
+        if card1[1] == card2[1]:
+            return True
+        return False
+
+    def check_ranks_equal(self, card1, card2):
+        if card1[0] == card2[0]:
+            return True
+        return False
+
+    def check_pair(self, game_state, round_state, active): ##returns the rank of pair if there exists a pair, 0 otherwise
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+        cards = my_cards + board_cards
+
+        for card1_index in range(cards.len()-1):
+            for card2_index in range (card1_index + 1, cards.len()):
+                if self.check_ranks_equal(cards[card1_index], cards[card2_index]):
+                    return True
+        return False
+    
     def get_action(self, game_state, round_state, active):
         '''
         Where the magic happens - your code should implement this function.
@@ -306,7 +328,7 @@ class Player(Bot):
         rank2 = card2[0]
         suit2 = card2[1]
 
-        card_type = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "k", "A"]
+        card_type = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "k", "A"]
 
         big_blind = bool(active)  # True if you are the big blind
 
@@ -324,7 +346,7 @@ class Player(Bot):
                     return RaiseAction(min(max(min_cost, 80), max_cost))
                 if rank1  == "J" and rank2 == "J":
                     return RaiseAction(min(max(min_cost, 77), max_cost))
-                if rank1  == "10" and rank2 == "10":
+                if rank1  == "T" and rank2 == "T":
                     return RaiseAction(min(max(min_cost, 75), max_cost))
                 if rank1  == "9" and rank2 == "9":
                     return RaiseAction(min(max(min_cost, 72), max_cost))
@@ -391,12 +413,12 @@ class Player(Bot):
                             return CallAction()
 
                 if rank1 == "J" or rank2 == "J": #Has a J (10 suited)
-                    if suit1 == suit2 and suit1 == "10":
+                    if suit1 == suit2 and suit1 == "T":
                         return CallAction()
                     if opp_pip <= 75:
                             return CallAction()
 
-                if rank1 == "10" or rank2 == "10": #Has a 10 (7-9 suited, 9 unsuited)
+                if rank1 == "T" or rank2 == "T": #Has a 10 (7-9 suited, 9 unsuited)
                     if suit1 == suit2 and opp_pip <= 75:
                         for i in range(5, 8):
                             if rank1 == card_type[i]:
@@ -441,40 +463,6 @@ class Player(Bot):
         if random.random() < 0.25:
             return FoldAction()
         return CallAction()
-
-    def check_suits_equal(self, card1, card2):
-        if card1[1] == card2[1]:
-            return True
-        return False
-
-    def check_ranks_equal(self, card1, card2):
-        if card1[0] == card2[0]:
-            return True
-        return False
-
-    def check_pair(self, cards): ##returns the rank of pair if there exists a pair, 0 otherwise
-        for card1_index in range(cards.len()-1):
-            for card2_index in range (card1_index + 1, cards.len()):
-                if check_suits_equal(cards[card1_index], cards[card2_index]) and check_ranks_equal(cards[card1_index], my_cards[card2_index]):
-                    return cards[card1_index][0]
-        return '0'
-
-    def check_2_pairs(my_cards, street):
-        num_pair = 0
-        pairs = []
-        for i in range(0, street+1):
-            for j in range(i+1, street+2):
-                if check_ranks_equal(my_cards[i], my_cards[j]):
-                    num_pair += 1
-                    pairs.append([my_cards[i], my_cards[j]])
-        if num_pair == 2:
-            return pairs
-        else:
-            return None
-
-
-
-
 
 
 
