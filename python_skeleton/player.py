@@ -9,6 +9,21 @@ from skeleton.runner import parse_args, run_bot
 
 import random
 
+def check_2_pairs(my_cards, street):
+    num_pair = 0
+    pairs = []
+    for i in range(0, street+1):
+        for j in range(i+1, street+2):
+            if check_ranks_equal(my_cards[i], my_cards[j]):
+                num_pair += 1
+                pairs.append([my_cards[i], my_cards[j]])
+    if num_pair == 2:
+        return pairs
+    else:
+        return None
+
+def check_triples(my_cards, street):
+    pass
 
 class Player(Bot):
     '''
@@ -64,7 +79,7 @@ class Player(Bot):
         street = previous_state.street  # 0, 3, 4, or 5 representing when this round ended
         my_cards = previous_state.hands[active]  # your cards
         opp_cards = previous_state.hands[1-active]  # opponent's cards or [] if not revealed
-        
+
         my_bounty_hit = terminal_state.bounty_hits[active]  # True if you hit bounty
         opponent_bounty_hit = terminal_state.bounty_hits[1-active] # True if opponent hit bounty
         bounty_rank = previous_state.bounties[active]  # your bounty rank
@@ -102,7 +117,7 @@ class Player(Bot):
         my_bounty = round_state.bounties[active]  # your current bounty rank
         my_contribution = STARTING_STACK - my_stack  # the number of chips you have contributed to the pot
         opp_contribution = STARTING_STACK - opp_stack  # the number of chips your opponent has contributed to the pot
-    
+
         #Version 1 - Logic Bot
         my_cards = round_state.hands[active]
         card1 = my_cards[0]
@@ -122,7 +137,7 @@ class Player(Bot):
                 min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
                 min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
                 max_cost = max_raise - my_pip  # the cost of a maximum bet/raise
-                
+
                 if rank1  == "A" and rank2 == "A":
                     return RaiseAction(min(max(min_cost, 85), max_cost))
                 if rank1  == "K" and rank2 == "K":
@@ -135,7 +150,7 @@ class Player(Bot):
                     return RaiseAction(min(max(min_cost, 75), max_cost))
                 if rank1  == "9" and rank2 == "9":
                     return RaiseAction(min(max(min_cost, 72), max_cost))
-                    
+
             if CallAction in legal_actions:
                 if rank1 == rank2:
                     if rank1 == "4" or rank1 == "5" or rank1 == "6" or rank1 == "7" or rank1 == "8": #Pairs 4-8
@@ -143,7 +158,7 @@ class Player(Bot):
                     else:
                         if opp_pip <= 75:
                             return CallAction()
-                    
+
                 if rank1 == "A" or rank2 == "A": #Has a A (2-K suited, 6-K unsuited)
                     if suit1 == suit2:  
                         return CallAction() 
@@ -153,18 +168,18 @@ class Player(Bot):
                                 return CallAction()
                             if rank2 == card_type[i]:
                                 return CallAction()
-                        
+
                         if opp_pip <= 75:
                             return CallAction()
-                
+
                 if rank1 == "K" or rank2 == "K": #Has a K (7-Q suited, 9-Q unsuited)
-                    if suit1 == suit2:  
+                    if suit1 == suit2:
                         for i in range(5, len(card_type)-2):
                             if rank1 == card_type[i]:
                                 return CallAction()
                             if rank2 == card_type[i]:
                                 return CallAction()
-                        
+
                         if opp_pip <= 75:
                             return CallAction()
                     else:
@@ -173,18 +188,18 @@ class Player(Bot):
                                 return CallAction()
                             if rank2 == card_type[i]:
                                 return CallAction()
-                        
+
                         if opp_pip <= 75:
                             return CallAction()
-                            
+
                 if rank1 == "Q" or rank2 == "Q": #Has a Q (9-J suited, 10-J unsuited)
-                    if suit1 == suit2:  
+                    if suit1 == suit2:
                         for i in range(7, len(card_type)-3):
                             if rank1 == card_type[i]:
                                 return CallAction()
                             if rank2 == card_type[i]:
                                 return CallAction()
-                        
+
                         if opp_pip <= 75:
                             return CallAction()
                     else:
@@ -193,48 +208,43 @@ class Player(Bot):
                                 return CallAction()
                             if rank2 == card_type[i]:
                                 return CallAction()
-                        
+
                         if opp_pip <= 75:
                             return CallAction()
-                            
+
                 if rank1 == "J" or rank2 == "J": #Has a J (10 suited)
                     if suit1 == suit2 and suit1 == "10":
                         return CallAction()
                     if opp_pip <= 75:
                             return CallAction()
-                
+
                 if rank1 == "10" or rank2 == "10": #Has a 10 (7-9 suited, 9 unsuited)
-                    if suit1 == suit2 and opp_pip <= 75:  
+                    if suit1 == suit2 and opp_pip <= 75:
                         for i in range(5, 8):
                             if rank1 == card_type[i]:
                                 return CallAction()
                             if rank2 == card_type[i]:
                                 return CallAction()
-                        
+
                     if suit1 != suit2 and opp_pip <= 75:
                         if suit1 == "9":
                             return CallAction()
-                
+
                 if rank1 == "9" or rank2 == "9": #Has a 9 (8-9 suited)
-                    if suit1 == suit2 and opp_pip <= 75:  
+                    if suit1 == suit2 and opp_pip <= 75:
                         for i in range(6, 8):
                             if rank1 == card_type[i]:
                                 return CallAction()
                             if rank2 == card_type[i]:
                                 return CallAction()
-                    
-                    
+
+
             if CheckAction in legal_actions:
                 return CheckAction()
-            
+
             if FoldAction in legal_actions:
                 return FoldAction()
-                        
-                        
-                        
-                    
 
-                
         if RaiseAction in legal_actions:
            min_raise, max_raise = round_state.raise_bounds()  # the smallest and largest numbers of chips for a legal bet/raise
            min_cost = min_raise - my_pip  # the cost of a minimum bet/raise
