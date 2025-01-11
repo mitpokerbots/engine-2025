@@ -77,6 +77,199 @@ class Player(Bot):
         if opponent_bounty_hit:
             print("Opponent hit their bounty of " + opponent_bounty_rank + "!")
 
+    def handle_new_round(self, game_state, round_state, active):
+        '''
+        Called when a new round starts. Called NUM_ROUNDS times.
+
+        Arguments:
+        game_state: the GameState object.
+        round_state: the RoundState object.
+        active: your player's index.
+
+        Returns:
+        Nothing.
+        '''
+        my_bankroll = game_state.bankroll  # the total number of chips you've gained or lost from the beginning of the game to the start of this round
+        game_clock = game_state.game_clock  # the total number of seconds your bot has left to play this game
+        round_num = game_state.round_num  # the round number from 1 to NUM_ROUNDS
+        my_cards = round_state.hands[active]  # your cards
+        big_blind = bool(active)  # True if you are the big blind
+        my_bounty = round_state.bounties[active]  # your current bounty rank
+        #pass
+    
+    def handle_round_over(self, game_state, terminal_state, active):
+        '''
+        Called when a round ends. Called NUM_ROUNDS times.
+
+        Arguments:
+        game_state: the GameState object.
+        terminal_state: the TerminalState object.
+        active: your player's index.
+
+        Returns:
+        Nothing.
+        '''
+        my_delta = terminal_state.deltas[active]  # your bankroll change from this round
+        previous_state = terminal_state.previous_state  # RoundState before payoffs
+        street = previous_state.street  # 0, 3, 4, or 5 representing when this round ended
+        my_cards = previous_state.hands[active]  # your cards
+        opp_cards = previous_state.hands[1-active]  # opponent's cards or [] if not revealed
+
+        my_bounty_hit = terminal_state.bounty_hits[active]  # True if you hit bounty
+        opponent_bounty_hit = terminal_state.bounty_hits[1-active] # True if opponent hit bounty
+        bounty_rank = previous_state.bounties[active]  # your bounty rank
+
+        # The following is a demonstration of accessing illegal information (will not work)
+        opponent_bounty_rank = previous_state.bounties[1-active]  # attempting to grab opponent's bounty rank
+
+        if my_bounty_hit:
+            print("I hit my bounty of " + bounty_rank + "!")
+        if opponent_bounty_hit:
+            print("Opponent hit their bounty of " + opponent_bounty_rank + "!")
+
+
+    def check_Quads(self, game_state, round_state, active):
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+
+        all_cards = my_cards + board_cards
+        all_cards.sort()
+
+        for i in range(0, len(all_cards)-3):
+            if all_cards[i][0] == all_cards[i+1][0] and all_cards[i+1][0] == all_cards[i+2][0] and all_cards[i+2][0] == all_cards[i+3][0]:
+                print("There's a Quads")
+                return True
+            
+        return False
+    
+    def check_FullHouse(self, game_state, round_state, active):
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+        all_cards = my_cards + board_cards
+        all_cards.sort()
+
+        isTriple = False
+        triple = None
+
+        for i in range(0, len(all_cards)-2):
+            if all_cards[i][0] == all_cards[i+1][0] and all_cards[i+1][0] == all_cards[i+2][0]:
+                print("There's a Triples")
+                isTriple = True
+                triple = all_cards[i][0]
+        
+        if isTriple == False:
+            return False
+
+        for i in range(len(all_cards)):
+            for j in range(i+1, len(all_cards)):
+                if all_cards[i][0] == all_cards[j][0] and all_cards[i][0] != triple:
+                    return True
+
+        return False
+    
+    def check_Straight(self, game_state, round_state, active):
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+        all_cards = my_cards + board_cards
+        
+        if street == 0:
+            return False
+        
+        ranks = '23456789TJQKA'
+        rank_values = {rank: index for index, rank in enumerate(ranks)}
+        card_ranks = sorted([rank_values[card[0]] for card in all_cards])
+
+        straight = False
+        for i in range(len(card_ranks)-4):
+            if card_ranks[i] == card_ranks[i+1]-1 and card_ranks[i+1] == card_ranks[i+2]-1 and card_ranks[i+2] == card_ranks[i+3]-1 and card_ranks[i+3] == card_ranks[i+4]-1:
+                return True
+        
+        return False
+    
+    def check_flush(self,game_state,round_state, active):
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+        all_cards = my_cards + board_cards
+
+        suits = [card[1] for card in all_cards]
+        suit_counts = {}
+
+        for suit in set(suits):
+            count = suits.count(suit)
+            suit_counts[suit] = count
+        
+        if max(suit_counts.values()) == 5:
+            return True
+        else:
+            return False
+        
+    def check_fourSameSuit(self,game_state,round_state, active):
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+        all_cards = my_cards + board_cards
+
+        suits = [card[1] for card in all_cards]
+        suit_counts = {}
+
+        for suit in set(suits):
+            count = suits.count(suit)
+            suit_counts[suit] = count
+        
+        if max(suit_counts.values()) == 4:
+            return True
+        else:
+            return False
+        
+    def check_triples(self, game_state, round_state, active):
+            street = round_state.street
+            my_cards = round_state.hands[active]
+            board_cards = round_state.deck[:street]
+            current_cards = my_cards + board_cards
+
+            # Create a dictionary to count occurrences of each rank
+            rank_counts = {}
+
+            for card in current_cards:
+                rank = card[0]
+                if rank not in rank_counts:
+                    rank_counts[rank] = 0
+                rank_counts[rank] += 1
+
+            # Check if any rank has a count of exactly 3
+            for count in rank_counts.values():
+                if count == 3:
+                    return True
+
+            return False
+
+    def check_2_pairs(self, game_state, round_state, active):
+        street = round_state.street
+        my_cards = round_state.hands[active]
+        board_cards = round_state.deck[:street]
+        current_cards = my_cards + board_cards
+
+        # Create a dictionary to count occurrences of each rank
+        rank_counts = {}
+        for card in current_cards:
+            rank = card[0]
+            if rank not in rank_counts:
+                rank_counts[rank] = 0
+            rank_counts[rank] += 1
+
+        # Count the number of pairs
+        num_pairs = 0
+        for count in rank_counts.values():
+            if count == 2:
+                num_pairs += 1
+
+        # Check if there are exactly two pairs
+        return num_pairs == 2
+    
     def get_action(self, game_state, round_state, active):
         '''
         Where the magic happens - your code should implement this function.
@@ -279,8 +472,6 @@ class Player(Bot):
         else:
             return None
 
-    def check_triples(my_cards, street):
-        pass
 
 
 
