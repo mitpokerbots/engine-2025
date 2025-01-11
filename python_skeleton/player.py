@@ -230,10 +230,6 @@ class Player(Bot):
             if FoldAction in legal_actions:
                 return FoldAction()
                         
-
-        if street == 3:
-            if RaiseAction in legal_actions:
-                
                         
                         
                     
