@@ -3,6 +3,7 @@ from skeleton.states import GameState, TerminalState, RoundState
 from skeleton.states import NUM_ROUNDS, STARTING_STACK, BIG_BLIND, SMALL_BLIND
 from skeleton.bot import Bot
 from skeleton.runner import parse_args, run_bot
+from typing import NewType
 
 ''' Game Reference
 my_bankroll = game_state.bankroll  # the total number of chips you've gained or lost from the beginning of the game to the start of this round
@@ -27,7 +28,9 @@ opponent_bounty_rank = previous_state.bounties[1-active]  # attempting to grab o
 '''
 DISCRETE_ACTIONS = ["k", "bMIN", "bMID", "bMAX", "c", "f"]
 
-class PreflopHistory(base.History):
+Action = New
+
+class PreflopHistory():
 
     def __init__(self, history: List[Action] = [], game_state = None, round_state = None, sample_id=0, terminal_state = None):
         super().__init__(history)
@@ -86,7 +89,7 @@ class PreflopHistory(base.History):
         )
 
     def is_chance(self):
-        return super().is_chance()
+        return self.player() == -1
 
     def sample_chance_outcome(self):
         assert self.is_chance()
@@ -123,16 +126,19 @@ class PreflopHistory(base.History):
 
     def get_infoSet_key(self) -> List[Action]:
         """
-        This is where we abstract away cards and bet sizes.
+        Abstract cards and bet sizes
         """
-        assert not self.is_chance()
-        assert not self.is_terminal()
 
-        player = self.player()
+        if self.is_chance() or self.is_terminal():
+            raise Exception
+
         infoset = []
+        cluster_id = str(get_preflop_cluster_id(self.history[self.player()]))
+
         # ------- CARD ABSTRACTION -------
-        infoset.append(str(get_preflop_cluster_id(self.history[player])))
-        for i, action in enumerate(self.history):
+        infoset.append(cluster_id)
+
+        for action in self.history:
             if action in DISCRETE_ACTIONS:
                 infoset.append(action)
 
